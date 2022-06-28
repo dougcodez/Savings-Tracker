@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleafe.org/">
+<head th:replace="fragments :: head"></head>
+<body class="container">
+<h1 th:text="${title}">Default Title</h1>
+<nav th:replace="fragments :: navigation"></nav>
+<p th:unless="${trackerObjects} and ${trackerObjects.size()}">You Currently Have No Savings Information Available</p>
+<table class="table">
+    <tr>
+        <th>Savings Tracker Name</th>
+        <th>Savings Tracker Date</th>
+        <th>Savings Tracker Description</th>
+        <th>Savings Tracker Amount</th>
+    </tr>
+
+    <tr th:each="tracker : ${trackerObjects}">
+        <td th:text="${tracker.name}"></td>
+        <td th:text="${tracker.date}"></td>
+        <td th:text="${tracker.description}"></td>
+        <td th:text="${tracker.amount}"></td>
+
+    </tr>
+</table>
+</body>
+</html>
