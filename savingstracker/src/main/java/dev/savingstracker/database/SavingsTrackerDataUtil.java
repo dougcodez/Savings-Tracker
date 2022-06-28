@@ -23,10 +23,9 @@ public class SavingsTrackerDataUtil {
         checkIfEmpty();
         statementAPI.executeQuery("SELECT * FROM SAVINGS", resultSet -> {
             while (resultSet.next()) {
-                tracker.set(new Tracker(resultSet.getString("NAME"), resultSet.getString("DATE"), resultSet.getString("DESCRIPTION"), resultSet.getInt("AMOUNT")));
+                tracker.set(new Tracker(resultSet.getString("SESSIONID"), resultSet.getString("NAME"), resultSet.getString("DATE"), resultSet.getString("DESCRIPTION"), resultSet.getInt("AMOUNT"), resultSet.getInt("SAVINGSAMOUNT")));
                 if (!trackerObjects.contains(tracker.get())) {
                     trackerObjects.add(tracker.get());
-                    System.out.println("Tetsing");
                 }
             }
             return resultSet;
@@ -36,49 +35,34 @@ public class SavingsTrackerDataUtil {
     public void checkIfEmpty() {
         statementAPI.executeQuery("SELECT * FROM SAVINGS", resultSet -> {
             if (!resultSet.next()) {
-                System.out.println("Table was currently empty! Inserting default data...");
+                System.out.println("Table was currently empty!");
             }
             return resultSet;
         });
     }
 
     public void addTrackerObject(Tracker trackerObject) {
-        String insert = "INSERT INTO SAVINGS (NAME, DATE, DESCRIPTION, AMOUNT) " + "VALUES (?,?,?,?)";
-        updateQuery(insert, trackerObject);
-    }
-
-    public void removeTrackerObject(Tracker trackerObject) {
-        String delete = "DELETE FROM SAVINGS WHERE NAME = " + trackerObject.getName() + " AND DATE = " + trackerObject.getDate() + " AND DESCRIPTION = " + trackerObject.getDescription() + " AND AMOUNT = " + trackerObject.getAmount();
-        if (check(trackerObject.getName())) {
-            updateQuery(delete, trackerObject);
-        } else {
-            System.out.println("No such entry in database!");
-        }
-    }
-
-    private void updateQuery(String queryType, Tracker trackerObject) {
-        if(!isValidDate(trackerObject.getDate())) {
+        if (!isValidDate(trackerObject.getDate())) {
             throw new IllegalArgumentException("Invalid date format!");
         }
-        statementAPI.executeUpdate(queryType, ps -> {
-            ps.setString(1, trackerObject.getName());
-            ps.setString(2, trackerObject.getDate());
-            ps.setString(3, trackerObject.getDescription());
-            ps.setInt(4, trackerObject.getAmount());
+        String insert = "INSERT INTO SAVINGS (SESSIONID, NAME, DATE, DESCRIPTION, AMOUNT, SAVINGSAMOUNT) " + "VALUES (?,?,?,?,?,?)";
+        statementAPI.executeUpdate(insert, ps -> {
+            ps.setString(1, trackerObject.getSessionID());
+            ps.setString(2, trackerObject.getName());
+            ps.setString(3, trackerObject.getDate());
+            ps.setString(4, trackerObject.getDescription());
+            ps.setInt(5, trackerObject.getAmount());
+            ps.setInt(6, trackerObject.getSavingsAmount());
         });
     }
 
-    private boolean check(String object) {
-        AtomicBoolean fetchedValue = new AtomicBoolean();
-        statementAPI.executeQuery("SELECT * FROM SAVINGS WHERE NAME=?", ps ->
-                ps.setString(1, object), rs -> {
-            if (rs.next()) {
-                fetchedValue.set(true);
-            }
-            return rs;
+    public void removeTrackerObject(String sessionID) {
+        String delete = "DELETE FROM SAVINGS WHERE SESSIONID = ?";
+        statementAPI.executeUpdate(delete, ps -> {
+            ps.setString(1, sessionID);
         });
-        return fetchedValue.get();
     }
+
 
     private boolean isValidDate(String inDate) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");

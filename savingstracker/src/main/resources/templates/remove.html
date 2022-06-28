@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleafe.org/">
+<head th:replace="fragments :: head"></head>
+<body class="container">
+<h1 th:text="${title}">Default Title</h1>
+<nav th:replace="fragments :: navigation"></nav>
+<form method="post" style="...">
+  <div class="form-group">
+    <label for="name-field">Session ID</label>
+    <input class="form-control" id="name-field" type="text" name="sessionID"/>
+  </div>
+
+  <input type="submit" value="Remove Financial Information"/>
+</form>
+</body>
+</html>

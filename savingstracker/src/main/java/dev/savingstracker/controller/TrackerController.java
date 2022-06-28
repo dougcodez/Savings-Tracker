@@ -1,7 +1,9 @@
 package dev.savingstracker.controller;
 
+import dev.savingstracker.SavingsTrackerMainApplication;
 import dev.savingstracker.database.SavingsTrackerDataUtil;
 import dev.savingstracker.model.Tracker;
+import dev.savingstracker.session.SessionIDManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +23,9 @@ public class TrackerController {
         SavingsTrackerDataUtil.transferDatabaseInfo(trackers);
         model.addAttribute("trackerObjects", trackers);
         model.addAttribute("title", "Savings Tracker");
-        return"index";
+        return "index";
     }
+
     @RequestMapping(value = "add", method = RequestMethod.GET)
     public String displayAddTrackerForm(Model model) {
         model.addAttribute("title", "Add Tracker");
@@ -31,13 +34,25 @@ public class TrackerController {
 
     @RequestMapping(value = "add", method = RequestMethod.POST)
     public String processAddTracker(@RequestParam String name,
-                                 @RequestParam String date,
-                                 @RequestParam String description,
-                                 @RequestParam int amount) {
-        Tracker trackerObject = new Tracker(name, date, description, amount);
+                                    @RequestParam String date,
+                                    @RequestParam String description,
+                                    @RequestParam int amount,
+                                    @RequestParam int savingsAmount) {
+        Tracker trackerObject = new Tracker(SessionIDManager.generateNew(), name, date, description, amount, savingsAmount);
         SavingsTrackerDataUtil.addTrackerObject(trackerObject);
         return "redirect:";
     }
 
+    @RequestMapping(value = "remove", method = RequestMethod.GET)
 
+    public String displayRemoveTrackerForm(Model model) {
+        model.addAttribute("title", "Remove Tracker");
+        return "remove";
+    }
+
+    @RequestMapping(value = "remove", method = RequestMethod.POST)
+    public String processRemoveTracker(@RequestParam String sessionID) {
+        SavingsTrackerDataUtil.removeTrackerObject(sessionID);
+        return "redirect:";
+    }
 }
